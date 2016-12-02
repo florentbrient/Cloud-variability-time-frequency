@@ -10,3 +10,7 @@ What do the code do :
 time series into account (Not sure if it works with python now). The original pairs of time series were resampled by drawing blocks of random length Li and assembling new pairs of bootstrap time series from them, of the same total length L as the original time series (the last block to be added is simply truncated to obtain the correct total length L).
 - Estimate 200 bootstrap samples of the original time series to permit estimating PDFs of uncertainty of original regression/correlation coefficients (could then be considered as confidence interval of the original regression slope).
 
+References
+----------
+
+Brient F, Schneider T (2016) Constraints on Climate Sensitivity from Space-Based Measurements of Low-Cloud Reflection. J. Clim., 29:5821–5835, DOI: 10.1175/JCLI-D-15-0897.1

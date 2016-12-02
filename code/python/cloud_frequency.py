@@ -1,22 +1,40 @@
 from netCDF4 import Dataset
 import numpy as np
 from scipy import signal
+import matplotlib
+import matplotlib.pyplot as plt
 
 #
-def fft(tmp,freqall) : 
+def fft(tmp,samp,freqall) : 
   # Calculate the Fourier transform for one time serie
   # Names allowed in freqall = intra,inter,decadal 
-  y    = data
-  L    = length(y) # Length of the signal
+  y    = tmp
+  L    = len(y) # Length of the signal
   
-  deg = 
-  ripple =
-  b, a = signal.cheby1(deg, ripple, WP, band, analog=True)
+  if strcmp(samp,'mth') :
+    Fs = 1/(30.*24.*3600.);       # Sampling frequency
+      
+  ripple = Fs/np.power(10,8);
+  
   #[z,p,k] = cheby1(deg,ripple,WP,band); 
   
   if ff in freqall :
+    # Extract information
     band, deg, pmin, pmax = define_fft(ff)
-     
+    if band is 'low' :
+      WP = 2/float(pmin)
+    elif band is 'high' :
+      WP = 2/float(pmax)
+    else :
+      WP = [2/float(pmin),2/float(pmax)]
+    # Create a Chebyshev type I filter design
+    b, a = signal.cheby1(deg, ripple, WP, band, analog=True)
+    # Forward-backward filter
+    yd = signal.filtfilt(b, a, tmp, padlen=1)
+    # Reconstruct the filtered time serie
+    sig  = np.fft.fft(yd)
+    freq = np.fft.fftfreq(yd.shape[-1])
+    tmp1 = np.fft.ifft(sig)
 
   
 def define_fft(typ):
@@ -26,19 +44,22 @@ def define_fft(typ):
     band='high'
     deg =12
     periodmax=6; 
-  if typ is 'season' :
+  elif typ is 'season' :
     band='bandpass'
-    deg =8
+    deg =8 # different here
     periodmin=11.8;
     periodmax=12.2;
-  if typ is 'inter' :
+  elif typ is 'inter' :
     band='low'
     deg =12
     periodmin=30;
-  if typ is 'decadal' :
+  elif typ is 'decadal' :
     band='low'
     deg =6 # different here
     periodmin=200;
+  else :
+    print ' Problem with typ. Not recognized : ',typ
+    stop
     
   return band, deg, periodmin, periodmax
 
@@ -61,6 +82,7 @@ def define_fft(typ):
 
 
 
+##### User defined ######
 # Open timeseries
 try :
   ev1,ev2=open(file.dat)
@@ -68,7 +90,12 @@ except :
   # Try random
   ev1=np.random.random(100)
   ev2=np.random.random(100)
-  
+
+# Data are monthly (routine not ready otherwise)
+samp = 'mth';
+#########################
+
+
 NB = len(ev1)
 data = np.zeros((2,NB))
 data[0,:]=ev1 ; data[1,:]=ev2
@@ -85,12 +112,18 @@ for ij in np.arange(12) :
   dataseas[:,ij] = np.mean(data[:,np.arange(ij,NB,12)],axis=1)
   
 # Deseasonalized time series
-datanoseas = data - dataseas
+ik = 0
+datanoseas = np.zeros((data.shape))
+for ij in np.arange(NB) :
+  datanoseas[:,ij] = data[:,ij] - dataseas[:,ik]
+  ik += 1 
+  if ik == 12 : ik=0
 
-# Calculate FFT 
+# Calculate FFT
+freqall = 'inter'
 for ij in np.arange(2) :
   tmp     = datanoseas[ij,:]
-  tmp_FFT = fft(tmp)
+  tmp_FFT = fft(tmp,samp,freqall)
 
 
 
