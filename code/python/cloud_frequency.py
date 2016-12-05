@@ -10,14 +10,17 @@ def fft(tmp,samp,freqall) :
   # Names allowed in freqall = intra,inter,decadal 
   y    = tmp
   L    = len(y) # Length of the signal
+  namefig = 'FFT_decomp_'+samp
   
   if strcmp(samp,'mth') :
-    Fs = 1/(30.*24.*3600.);       # Sampling frequency
+    Fs = 1/(30.*24.*3600.)       # Sampling frequency
       
-  ripple = Fs/np.power(10,8);
+  ripple = Fs/np.power(10,8)
   
   #[z,p,k] = cheby1(deg,ripple,WP,band); 
   
+  fig = plt.figure('freq')
+  j = 0
   if ff in freqall :
     # Extract information
     band, deg, pmin, pmax = define_fft(ff)
@@ -28,14 +31,20 @@ def fft(tmp,samp,freqall) :
     else :
       WP = [2/float(pmin),2/float(pmax)]
     # Create a Chebyshev type I filter design
-    b, a = signal.cheby1(deg, ripple, WP, band, analog=True)
+    b, a = signal.cheby1(deg, ripple, WP, band)
+    # Frequency and amplitude of the signal
+    w, h = signal.freqs(b, a)
     # Forward-backward filter
-    yd = signal.filtfilt(b, a, tmp, padlen=1)
-    # Reconstruct the filtered time serie
-    sig  = np.fft.fft(yd)
-    freq = np.fft.fftfreq(yd.shape[-1])
-    tmp1 = np.fft.ifft(sig)
+    yd = signal.filtfilt(b, a, tmp)
+    
+    plt.subplot(2,round(len(freqall))/2,j)
+    plt.plot(tmp,'k')
+    plt.plot(yd,'r')
+    plt.title(ff)
+    j += 1
 
+  fig.savefig('./'+namefig+'.png')
+  fig.savefig('./'+namefig+'.pdf')
   
 def define_fft(typ):
   periodmin=0
@@ -43,20 +52,20 @@ def define_fft(typ):
   if typ is 'intra' :
     band='high'
     deg =12
-    periodmax=6; 
+    periodmax=6
   elif typ is 'season' :
     band='bandpass'
     deg =8 # different here
-    periodmin=11.8;
-    periodmax=12.2;
+    periodmin=11.8
+    periodmax=12.2
   elif typ is 'inter' :
     band='low'
     deg =12
-    periodmin=30;
+    periodmin=30
   elif typ is 'decadal' :
     band='low'
     deg =6 # different here
-    periodmin=200;
+    periodmin=200
   else :
     print ' Problem with typ. Not recognized : ',typ
     stop
@@ -88,8 +97,8 @@ try :
   ev1,ev2=open(file.dat)
 except :
   # Try random
-  ev1=np.random.random(100)
-  ev2=np.random.random(100)
+  t=np.arange(100)
+  ev1=np.sin(2 * np.pi * t/4)/2 + np.sin(2 * np.pi * t/12) + np.sin(2 * np.pi * t/30)/2 + np.random.random((len(t)))/10
 
 # Data are monthly (routine not ready otherwise)
 samp = 'mth';
