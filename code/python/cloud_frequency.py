@@ -6,6 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import stationary_bootstrap as myboot
+import slopeinterval as myint
 
 #
 def fft(tmp,tmpch,samp,freqall) : 
@@ -23,7 +24,7 @@ def fft(tmp,tmpch,samp,freqall) :
   ripple = Fs/np.power(10,8)
   
   fig = plt.figure('freq')
-  print freqall
+  #print freqall
   j = 1
   for ff in freqall :
     # Extract information
@@ -98,8 +99,8 @@ def slope_create(F0,F1):
   rlm_results = sm.RLM(y,x, M=sm.robust.norms.HuberT()).fit()
   slope_r     = rlm_results.params[-1]
   intercept_r = rlm_results.params[0]
-  print slope,slope_r
-  print intercept,intercept_r
+  #print slope,slope_r
+  #print intercept,intercept_r
   
   del x,y,rlm_results
   # Save
@@ -110,12 +111,14 @@ def bootstraprun(F0,F1):
   B = 1
   # Index for bootstrapping 
   data = F0
+  # Optimal length (Need to work on that)
   w = 3 # ?
   # call stationary bootstrap (external routine)
   bsdata, indices = myboot.stat_boot(data,B,w)
   
   del bsdata
   return F0[indices],F1[indices]
+  
   
   
   
@@ -137,7 +140,7 @@ def bootstraprun(F0,F1):
 
 
 ##### User defined ######
-# Open timeseries
+# Open timeseries ev1 and ev2 (identical time length)
 try :
   ev1,ev2=open(file.dat)
 except :
@@ -148,6 +151,7 @@ except :
   # Add random noise
   ev1=ev0 + np.random.random((len(t)))/2
   ev2=ev0 + np.random.random((len(t)))/2
+ 
   
 # Data are monthly (routine not ready otherwise)
 samp = 'mth'
@@ -207,20 +211,29 @@ for ij in np.arange(NF) :
   
 # Bootstrapping (stationary)
 # Number of bootstrap Nb
-Nb = 2
-slopeb   = np.zeros((NF,Nb))
-intb     = np.zeros((NF,Nb))
-rb       = np.zeros((NF,Nb))
-slope_rb = np.zeros((NF,Nb))
-int_rb   = np.zeros((NF,Nb))
-for ij in np.arange(NF) :
-  F0 = ev0fft[ij,:]; F1 = ev1fft[ij,:]
+# Caution : the Full time serie (unfiltered is added for index=NF)
+Nb = 200
+slopeb   = np.zeros((NF+1,Nb))
+intb     = np.zeros((NF+1,Nb))
+rb       = np.zeros((NF+1,Nb))
+slope_rb = np.zeros((NF+1,Nb))
+int_rb   = np.zeros((NF+1,Nb))
+for ij in np.arange(NF+1) :
+  if ij == NF :
+    F0 = tmp[0,:]; F1 = tmp[1,:]
+  else :
+    F0 = ev0fft[ij,:]; F1 = ev1fft[ij,:]
   for ib in np.arange(Nb) :
     FF0,FF1 = bootstraprun(F0,F1)
     slopeb[ij,ib], intb[ij,ib], rb[ij,ib], slope_rb[ij,ib], int_rb[ij,ib] = slope_create(FF0[:,0],FF1[:,0])
-    
-    
-# Plotting some results
+  del F0,F1
+  
+  
+#########################
+# Plotting some results #
+#########################
+
+# Scatterplot
 fig = plt.figure('scatterplot')
 for ff in np.arange(NF+1) :
   plt.subplot(2,round(float(NF+1)/2),ff+1)
@@ -228,17 +241,32 @@ for ff in np.arange(NF+1) :
     t0 = tmp[0,:];t1=tmp[1,:]
     a  = slope0; ar  = slope_r0; 
     b  = int0; br  = int_r0; 
-    title = 'original'
+    title = 'Full '
+    cc = r0
+    stda = np.std(slope_rb[NF,:])
+    stdb = np.std(int_rb[NF,:])
   else :
     f = ff-1
     t0 = ev0fft[f,:];t1=ev1fft[f,:]
     a  = slope[f]; ar  = slope_r[f]; 
     b  = int[f]; br  = int_r[f]; 
     title = freqall[f]
+    cc = r[f]
+    stda = np.std(slope_rb[f,:])
+    stdb = np.std(int_rb[f,:])
+    
+  str0  = str('%01.2f' % (cc,))  
+  title = title + ' (r=' +str0+')'
     
   plt.plot(t0,t1,'b.')
   plt.plot(t0,a*t0  + b,'b')
   plt.plot(t0,ar*t0 + br,'r')
+  
+  pmin,pmax = myint.intver(t0,a,b,stda,stdb) 
+  plt.plot(t0,pmin ,'b--')
+  plt.plot(t0,pmax ,'b--')
+  print stda,stdb
+  
   plt.axhline(0,linewidth=0.5,color='black')
   plt.axvline(0,linewidth=0.5,color='black')
   plt.title(title)
@@ -249,7 +277,45 @@ fig.savefig('./'+namefig+'.pdf')
 plt.close()
 
 
-
+# Bar plot of uncertainties (based on the bootstrap analysis)
+nameall = ['slope','correlation']
+width   = 0.25
+ax      = dict()
+for ij in np.arange(len(nameall)):
+  fig = plt.figure(nameall[ij])
+  for ff in np.arange(NF+1) :
+    if ff == NF :
+      if ij==0:
+        t0 = slope0; t0r= slope_r0
+        ax[ff] = 'Full'
+      if ij==1:
+        t0 = r0
+    else :
+      if ij==0:
+        t0 = slope[ff]; t0r= slope_r[ff]
+        ax[ff] = freqall[ff]
+      if ij==1:
+        t0 = r[ff]
+      
+    if ij==0: 
+      std  = np.std(slopeb[ff,:])
+      stdr = np.std(slope_rb[ff,:])
+    if ij==1: 
+      std  = np.std(rb[ff,:])
+    print ij,ff,t0,std
+    plt.bar(ff-width/2,t0,width=width,color='b',yerr=std)
+    if ij==0:
+      plt.bar(ff+width/2,t0r,width=width,color='r',yerr=stdr)
+    #print ax
+    
+  plt.axhline(0,linewidth=0.5,color='black')
+  plt.xticks(np.arange(NF+1)+width/2,ax)
+  plt.title(nameall[ij])
+  namefig = 'Bar_'+nameall[ij]
+  fig.savefig('./'+namefig+'.png')
+  fig.savefig('./'+namefig+'.pdf')
+  plt.close()
+  
 
 
 
