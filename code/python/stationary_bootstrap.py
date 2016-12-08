@@ -60,8 +60,10 @@ def stat_boot(data,B,w) :
     # (rand<p)
     indices[i,~select[i,:]]=indices[i-1,~select[i,:]]+1
 
+  # Move extra indexes out of the time boundaries to the first positions
   indices[indices>=t] = indices[indices>=t]-t
 
+  # Make integer of indexes
   indices = indices.astype(int)
   # The indices make finding the bsdata simple
   bsdata = data[indices]

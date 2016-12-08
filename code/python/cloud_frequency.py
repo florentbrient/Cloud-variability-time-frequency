@@ -8,7 +8,7 @@ import statsmodels.api as sm
 import stationary_bootstrap as myboot
 import slopeinterval as myint
 
-#
+# Subroutine for the fft decomposition
 def fft(tmp,tmpch,samp,freqall) : 
   # Calculate the Fourier transform for one time serie
   # Names allowed in freqall = intra,inter,decadal 
@@ -21,7 +21,7 @@ def fft(tmp,tmpch,samp,freqall) :
     Fs = 1/(30.*24.*3600.)       # Sampling frequency
       
   # Not sure about the real value to use
-  ripple = Fs/np.power(10,8)
+  ripple = 0.01#.00001 #Fs#(Fs/np.power(10,8))*1000*1000*1000*1000
   
   fig = plt.figure('freq')
   #print freqall
@@ -62,6 +62,7 @@ def fft(tmp,tmpch,samp,freqall) :
   del ripple, WP, band, deg, pmin, pmax
   return tmpFFT
   
+# FFT information(cheby1 filter)
 def define_fft(typ):
   print 'Here the type is  ',typ
   periodmin=0
@@ -69,16 +70,16 @@ def define_fft(typ):
   if typ is 'intra' :
     band='high'
     deg =12
-    periodmax=4
+    periodmax=10
   elif typ is 'season' :
     band='bandpass'
-    deg =8 # different here
+    deg =2 # different here
     periodmin=11
     periodmax=13
   elif typ is 'inter' :
     band='low'
     deg =12
-    periodmin=36
+    periodmin=14
   elif typ is 'decadal' :
     band='low'
     deg =6 # different here
@@ -90,6 +91,7 @@ def define_fft(typ):
   return band, deg, periodmin, periodmax
   
   
+# Slope/correlation information
 def slope_create(F0,F1):
   # Calculate slopes (OLS)
   slope, intercept, r_value, p_value, std_err = stats.linregress(F0,F1)
@@ -99,11 +101,8 @@ def slope_create(F0,F1):
   rlm_results = sm.RLM(y,x, M=sm.robust.norms.HuberT()).fit()
   slope_r     = rlm_results.params[-1]
   intercept_r = rlm_results.params[0]
-  #print slope,slope_r
-  #print intercept,intercept_r
   
   del x,y,rlm_results
-  # Save
   return slope, intercept, r_value, slope_r, intercept_r
 
 def bootstraprun(F0,F1):
@@ -120,16 +119,7 @@ def bootstraprun(F0,F1):
   return F0[indices],F1[indices]
   
   
-  
-  
-
-
-
-
-
-            ######### Main Program ##########
-            
-        
+######### Main Program ##########        
 # This Python file is based on several subroutine used in Brient and Schneider 16 (Journal of Climate)
 # It decomposes two monthly time series in different frequency bands (intra-annual, seasonal, interannual and decadal)
 # It provides bootstrapped time series of the original dataset
@@ -150,7 +140,7 @@ except :
   ev0=np.sin(2 * np.pi * t/4)/2 + np.sin(2 * np.pi * t/12) + np.sin(2 * np.pi * t/36)/2
   # Add random noise
   ev1=ev0 + np.random.random((len(t)))/2
-  ev2=ev0 + np.random.random((len(t)))/2
+  ev2=ev1 + np.random.random((len(t)))/2
  
   
 # Data are monthly (routine not ready otherwise)
@@ -158,7 +148,7 @@ samp = 'mth'
 ##### User defined ######
 
 
-NB = len(ev1)
+NB   = len(ev1)
 data = np.zeros((2,NB))
 data[0,:]=ev1 ; data[1,:]=ev2
 
@@ -182,14 +172,14 @@ for ij in np.arange(NB) :
   if ik == 12 : ik=0
 
 # Calculate FFT
+# Time already defined ('intra','season','inter')
 freqall = ['intra','season','inter']
 NF      = len(freqall)
 #tmp     = data
 tmp     = datanoseas
 name_serie = ['first','second']
 for ij in np.arange(2) :
-  tmpch   = name_serie[ij]
-  tmpFFT  = fft(tmp[ij,:],tmpch,samp,freqall)
+  tmpFFT  = fft(tmp[ij,:],name_serie[ij],samp,freqall)
   if ij == 0 :
     ev0fft = tmpFFT
   else :
@@ -198,36 +188,36 @@ for ij in np.arange(2) :
 # Save slopes, correlation coefficient for the unfiltered data
 slope0, int0, r0, slope_r0, int_r0 = slope_create(tmp[0,:],tmp[1,:])
 
-# Save slopes, correlation coefficient for the filtered data
-slope   = np.zeros((NF))
-int     = np.zeros((NF))
-r       = np.zeros((NF))
-slope_r = np.zeros((NF))
-int_r   = np.zeros((NF))
-for ij in np.arange(NF) :
-  F0 = ev0fft[ij,:]; F1 = ev1fft[ij,:]
-  slope[ij], int[ij], r[ij], slope_r[ij], int_r[ij] = slope_create(F0,F1)
-  
-  
-# Bootstrapping (stationary)
-# Number of bootstrap Nb
-# Caution : the Full time serie (unfiltered is added for index=NF)
+# Save slopes, correlation coefficient for the unfilterd and filtered data series
+# Original
+slope   = np.zeros((NF+1))
+int     = np.zeros((NF+1))
+r       = np.zeros((NF+1))
+slope_r = np.zeros((NF+1))
+int_r   = np.zeros((NF+1))
+# Bootstrap
 Nb = 200
 slopeb   = np.zeros((NF+1,Nb))
 intb     = np.zeros((NF+1,Nb))
 rb       = np.zeros((NF+1,Nb))
 slope_rb = np.zeros((NF+1,Nb))
 int_rb   = np.zeros((NF+1,Nb))
+
 for ij in np.arange(NF+1) :
-  if ij == NF :
+  if ij == 0 :
     F0 = tmp[0,:]; F1 = tmp[1,:]
   else :
-    F0 = ev0fft[ij,:]; F1 = ev1fft[ij,:]
+    F0 = ev0fft[ij-1,:]; F1 = ev1fft[ij-1,:]
+  slope[ij], int[ij], r[ij], slope_r[ij], int_r[ij] = slope_create(F0,F1)
+  # Bootstrapping (stationary)
+  # Number of bootstrap Nb
+  # Caution : the Full time serie
   for ib in np.arange(Nb) :
     FF0,FF1 = bootstraprun(F0,F1)
     slopeb[ij,ib], intb[ij,ib], rb[ij,ib], slope_rb[ij,ib], int_rb[ij,ib] = slope_create(FF0[:,0],FF1[:,0])
+    del FF0,FF1
   del F0,F1
-  
+    
   
 #########################
 # Plotting some results #
@@ -239,22 +229,18 @@ for ff in np.arange(NF+1) :
   plt.subplot(2,round(float(NF+1)/2),ff+1)
   if ff == 0 :
     t0 = tmp[0,:];t1=tmp[1,:]
-    a  = slope0; ar  = slope_r0; 
-    b  = int0; br  = int_r0; 
     title = 'Full '
-    cc = r0
-    stda = np.std(slope_rb[NF,:])
-    stdb = np.std(int_rb[NF,:])
   else :
     f = ff-1
     t0 = ev0fft[f,:];t1=ev1fft[f,:]
-    a  = slope[f]; ar  = slope_r[f]; 
-    b  = int[f]; br  = int_r[f]; 
     title = freqall[f]
-    cc = r[f]
-    stda = np.std(slope_rb[f,:])
-    stdb = np.std(int_rb[f,:])
-    
+
+  a  = slope[ff]; ar  = slope_r[ff]
+  b  = int[ff]; br  = int_r[ff]
+  cc = r[ff]
+  stda = np.std(slope_rb[ff,:])
+  stdb = np.std(int_rb[ff,:])
+ 
   str0  = str('%01.2f' % (cc,))  
   title = title + ' (r=' +str0+')'
     
@@ -284,29 +270,22 @@ ax      = dict()
 for ij in np.arange(len(nameall)):
   fig = plt.figure(nameall[ij])
   for ff in np.arange(NF+1) :
-    if ff == NF :
-      if ij==0:
-        t0 = slope0; t0r= slope_r0
-        ax[ff] = 'Full'
-      if ij==1:
-        t0 = r0
+    if ff == 0 :
+      ax[ff] = 'Full'
     else :
-      if ij==0:
-        t0 = slope[ff]; t0r= slope_r[ff]
-        ax[ff] = freqall[ff]
-      if ij==1:
-        t0 = r[ff]
+      ax[ff] = freqall[ff-1]
       
-    if ij==0: 
+    if ij==0:
+      t0 = slope[ff]; t0r= slope_r[ff]
       std  = np.std(slopeb[ff,:])
       stdr = np.std(slope_rb[ff,:])
     if ij==1: 
+      t0 = r[ff]
       std  = np.std(rb[ff,:])
-    print ij,ff,t0,std
+      
     plt.bar(ff-width/2,t0,width=width,color='b',yerr=std)
     if ij==0:
       plt.bar(ff+width/2,t0r,width=width,color='r',yerr=stdr)
-    #print ax
     
   plt.axhline(0,linewidth=0.5,color='black')
   plt.xticks(np.arange(NF+1)+width/2,ax)
