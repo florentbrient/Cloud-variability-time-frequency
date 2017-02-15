@@ -28,7 +28,7 @@ By default, ev1 and ev2 are randomly created
 	- 3. correlation coefficient
 	- 4. robust slope of the regression line
 	- 5. robust intercept of the regression line
-- The 'output_original.dat' file lists covariance of ev1 with ev2
+- The 'output_original.dat' file lists covariances of ev1 with ev2
 - The 'output_boot_*.dat' files lists the Nb boostrapped covariances of ev1 with ev2
 
 ### Two additional routine are necessary :
