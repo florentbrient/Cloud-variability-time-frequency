@@ -4,7 +4,7 @@ The two time series need to share the same temporal indexes.
 
 Even if the code is written for monthly data, it may be adjusted to take into account lower temporal variability.
 
-What the code cloud_frequency.py do :
+### What the code cloud_frequency.py do :
 - Separate the annual cycle and the deseasonalized variability.
 - Filter anomalies of the time series for different frequency bands. 
 These bands are defined as intra-annual (1-yr low-pass filter), inter-annual (1-yr high-pass filter) and decadal (10-yr low-pass filter). 
@@ -17,11 +17,11 @@ The resampled time series share the same total length L as the original time ser
 - Estimate Nb bootstrap samples of the original time series to permit estimating PDFs of uncertainty of original regression/correlation coefficients.
 This PDF can be considered as confidence intervals of the original regression slope.
 
-Input (open from file.dat) :
+### Input (open from file.dat) :
 - Two time series of values : ev1 (low-cloud characteristics) and ev2 (SST)
 By default, ev1 and ev2 are randomly created
 
-Outputs (written in output*.dat files) :
+### Outputs (written in output*.dat files) :
 - For every frequency, the code writes in the files :
 	- 1. slope of the regression line,
 	- 2. intercept of the regression line
@@ -31,11 +31,11 @@ Outputs (written in output*.dat files) :
 - The 'output_original.dat' file lists covariance of ev1 with ev2
 - The 'output_boot_*.dat' files lists the Nb boostrapped covariances of ev1 with ev2
 
-Two additional routine are necessary :
+### Two additional routine are necessary :
 - stationary_bootstrap.py : Matlab routine written by Kevin Sheppard, rewritten in Python. Provide mixed indexes following the stationary bootstrap procedure.
 - slopeinterval.py : Calculate confidence intervals of the slope for the figures
 
-Need to be done (07/12/16) :
+#### Need to be done (07/12/16) :
 - A other filtering procedure
 - Autocorrelation of the time series not ready yet
 - PDF of uncertainty not relevant for the figure
