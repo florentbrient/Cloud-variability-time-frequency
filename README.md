@@ -23,11 +23,11 @@ By default, ev1 and ev2 are randomly created
 
 Outputs (written in output*.dat files) :
 - For every frequency, the code writes in the files :
-	⋅⋅1. slope of the regression line,
-	⋅⋅2. intercept of the regression line
-	⋅⋅3. correlation coefficient
-	⋅⋅4. robust slope of the regression line
-	⋅⋅5. robust intercept of the regression line
+	- 1. slope of the regression line,
+	- 2. intercept of the regression line
+	- 3. correlation coefficient
+	- 4. robust slope of the regression line
+	- 5. robust intercept of the regression line
 - The 'output_original.dat' file lists covariance of ev1 with ev2
 - The 'output_boot_*.dat' files lists the Nb boostrapped covariances of ev1 with ev2
 
