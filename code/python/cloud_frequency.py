@@ -132,7 +132,8 @@ def bootstraprun(F0,F1):
 ##### User defined ######
 # Open timeseries ev1 and ev2 (identical time length)
 try :
-  ev1,ev2=open(file.dat)
+  print 'Read file.dat'
+  ev1,ev2 = np.loadtxt('file.dat', unpack=True)
 except :
   # Try random
   t=np.arange(100)
@@ -141,6 +142,11 @@ except :
   # Add random noise
   ev1=ev0 + np.random.random((len(t)))/2
   ev2=ev1 + np.random.random((len(t)))/2
+  # Write in a file.dat
+  f = open('file.dat', 'wb')
+  for ij in np.arange(len(ev1)):
+    f.write("%.2f %.2f\n" % (ev1[ij], ev2[ij]))
+  f.close()
  
   
 # Data are monthly (routine not ready otherwise)
@@ -178,7 +184,7 @@ NF      = len(freqall)
 #tmp     = data
 tmp     = datanoseas
 name_serie = ['first','second']
-for ij in np.arange(2) :
+for ij in np.arange(len(name_serie)) :
   tmpFFT  = fft(tmp[ij,:],name_serie[ij],samp,freqall)
   if ij == 0 :
     ev0fft = tmpFFT
@@ -186,7 +192,7 @@ for ij in np.arange(2) :
     ev1fft = tmpFFT
     
 # Save slopes, correlation coefficient for the unfiltered data
-slope0, int0, r0, slope_r0, int_r0 = slope_create(tmp[0,:],tmp[1,:])
+#slope0, int0, r0, slope_r0, int_r0 = slope_create(tmp[0,:],tmp[1,:])
 
 # Save slopes, correlation coefficient for the unfilterd and filtered data series
 # Original
@@ -204,9 +210,9 @@ slope_rb = np.zeros((NF+1,Nb))
 int_rb   = np.zeros((NF+1,Nb))
 
 for ij in np.arange(NF+1) :
-  if ij == 0 :
+  if ij == 0 : #unfiltered
     F0 = tmp[0,:]; F1 = tmp[1,:]
-  else :
+  else : #filtered
     F0 = ev0fft[ij-1,:]; F1 = ev1fft[ij-1,:]
   slope[ij], int[ij], r[ij], slope_r[ij], int_r[ij] = slope_create(F0,F1)
   # Bootstrapping (stationary)
@@ -217,6 +223,26 @@ for ij in np.arange(NF+1) :
     slopeb[ij,ib], intb[ij,ib], rb[ij,ib], slope_rb[ij,ib], int_rb[ij,ib] = slope_create(FF0[:,0],FF1[:,0])
     del FF0,FF1
   del F0,F1
+  
+#########################
+# Creating output files #
+#########################
+
+freqall = ['Full'] + freqall
+
+# Original
+f = open('output_original.dat', 'wb')
+for ij in np.arange(NF+1):
+  f.write("%7s %.5f %.5f %.3f %.5f %.5f\n" % (freqall[ij], slope[ij], int[ij], r[ij], slope_r[ij], int_r[ij]))
+f.close()  
+
+# Bootstrapp
+fileout0='output_boot_xx.dat'
+for ij in np.arange(NF+1):
+  f = open(fileout0.replace('xx',freqall[ij]), 'wb')
+  for ib in np.arange(Nb):
+    f.write("%7s %.5f %.5f %.3f %.5f %.5f\n" % (freqall[ij], slopeb[ij,ib], intb[ij,ib], rb[ij,ib], slope_rb[ij,ib], int_rb[ij,ib]))
+  f.close()
     
   
 #########################
@@ -227,13 +253,13 @@ for ij in np.arange(NF+1) :
 fig = plt.figure('scatterplot')
 for ff in np.arange(NF+1) :
   plt.subplot(2,round(float(NF+1)/2),ff+1)
+  title = freqall[ff]
   if ff == 0 :
     t0 = tmp[0,:];t1=tmp[1,:]
-    title = 'Full '
   else :
     f = ff-1
     t0 = ev0fft[f,:];t1=ev1fft[f,:]
-    title = freqall[f]
+    
 
   a  = slope[ff]; ar  = slope_r[ff]
   b  = int[ff]; br  = int_r[ff]
@@ -266,15 +292,9 @@ plt.close()
 # Bar plot of uncertainties (based on the bootstrap analysis)
 nameall = ['slope','correlation']
 width   = 0.25
-ax      = dict()
 for ij in np.arange(len(nameall)):
   fig = plt.figure(nameall[ij])
   for ff in np.arange(NF+1) :
-    if ff == 0 :
-      ax[ff] = 'Full'
-    else :
-      ax[ff] = freqall[ff-1]
-      
     if ij==0:
       t0 = slope[ff]; t0r= slope_r[ff]
       std  = np.std(slopeb[ff,:])
@@ -288,7 +308,7 @@ for ij in np.arange(len(nameall)):
       plt.bar(ff+width/2,t0r,width=width,color='r',yerr=stdr)
     
   plt.axhline(0,linewidth=0.5,color='black')
-  plt.xticks(np.arange(NF+1)+width/2,ax)
+  plt.xticks(np.arange(NF+1)+width/2,freqall)
   plt.title(nameall[ij])
   namefig = 'Bar_'+nameall[ij]
   fig.savefig('./'+namefig+'.png')
