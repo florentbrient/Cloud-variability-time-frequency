@@ -21,13 +21,13 @@ Input (open from file.dat) :
 - Two time series of values : ev1 (low-cloud characteristics) and ev2 (SST)
 By default, ev1 and ev2 are randomly created
 
-Outputs (written in output*.dat files) :\\
+Outputs (written in output*.dat files) :
 - For every frequency, the code writes in the files :
- (1) slope of the regression line,
- (2) intercept of the regression line
- (3) correlation coefficient
- (4) robust slope of the regression line
- (5) robust intercept of the regression line
+⋅⋅1. slope of the regression line,
+⋅⋅2. intercept of the regression line
+⋅⋅3. correlation coefficient
+⋅⋅4. robust slope of the regression line
+⋅⋅5. robust intercept of the regression line
 - The 'output_original.dat' file lists covariance of ev1 with ev2
 - The 'output_boot_*.dat' files lists the Nb boostrapped covariances of ev1 with ev2
 
@@ -44,6 +44,6 @@ Need to be done (07/12/16) :
 References
 ----------
 
-Brient F and Schneider T (2016) Constraints on Climate Sensitivity from Space-Based Measurements of Low-Cloud Reflection. J. Clim., 29:5821–5835, DOI: 10.1175/JCLI-D-15-0897.1
-Politis D. N. and J. P. Romano (1994) : The stationary bootstrap. J. Amer. Stat. Assoc., 89, 1303–1313, doi:10.1080/01621459.1994.10476870
-Politis D. N. and H. White (2004) : Automatic block-length selection for the dependent bootstrap. Econometric Rev., 23, 53–70, doi:10.1081/ETC-120028836.
+* Brient F and Schneider T (2016) Constraints on Climate Sensitivity from Space-Based Measurements of Low-Cloud Reflection. J. Clim., 29:5821–5835, DOI: 10.1175/JCLI-D-15-0897.1
+* Politis D. N. and J. P. Romano (1994) : The stationary bootstrap. J. Amer. Stat. Assoc., 89, 1303–1313, doi:10.1080/01621459.1994.10476870
+* Politis D. N. and H. White (2004) : Automatic block-length selection for the dependent bootstrap. Econometric Rev., 23, 53–70, doi:10.1081/ETC-120028836.
