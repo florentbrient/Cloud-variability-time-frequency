@@ -21,7 +21,7 @@ Input (open from file.dat) :
 - Two time series of values : ev1 (low-cloud characteristics) and ev2 (SST)
 By default, ev1 and ev2 are randomly created
 
-Outputs (written in output*.dat files) :
+Outputs (written in output*.dat files) :\\
 - For every frequency, the code writes in the files :
  (1) slope of the regression line,
  (2) intercept of the regression line
