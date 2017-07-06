@@ -1,5 +1,5 @@
 # Cloud-variability-time-frequency
-This routine aims to calculate slopes and correlations between two time series (monthly data by default).
+This routine calculates slopes and correlations between two time series (monthly data by default).
 The two time series need to share the same temporal indexes.
 
 Even if the code is written for monthly data, it may be adjusted to take into account lower temporal variability.
@@ -18,25 +18,38 @@ The resampled time series share the same total length L as the original time ser
 This PDF can be considered as confidence intervals of the original regression slope.
 
 ### Input (open from file.dat) :
-- Two time series of values : ev1 (low-cloud characteristics) and ev2 (SST)
-By default, ev1 and ev2 are randomly created
+The code makes use of the following data, all of which are available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/data:
+if typ is set to "observations"
+- Two time series of values : SST (evx) and albcld (evy) listes in the files "sst_ersst.txt" and "albcld_ceres.txt"
+- Values are derived from the 25% driest monthly points of tropical oceans from ERSST and CERES2
+- The variable "albcld" is the ratio between the SW CRE and the solar insolation
+- The results used in Brient and Schneider (16) are listed in "results_obs.txt"
+if typ is set to "random"
+- evx and evy are randomly created
 
 ### Outputs (written in output*.dat files) :
 - For every frequency, the code writes in the files :
-	- 1. slope of the regression line,
-	- 2. intercept of the regression line
-	- 3. correlation coefficient
-	- 4. robust slope of the regression line
+	- 1. correlation coefficient
+	- 2. slope of the regression line (OLS) - %/K
+	- 3. robust slope of the regression line - %/K
+	- 4. intercept of the regression line (OLS)
 	- 5. robust intercept of the regression line
-- The 'output_original.dat' file lists covariances of ev1 with ev2
-- The 'output_boot_*.dat' files lists the Nb boostrapped covariances of ev1 with ev2
+- The 'output_original.dat' file lists covariances of evx with evy
+- The 'output_boot_*.dat' files lists the Nb boostrapped covariances of evx with evy for 4 different frequencies (deseason, intra, season, inter)
 
-### Two additional routine are necessary :
+## Figures
+The code create some figures, all of which are available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/figures:
+- "FFT_decomp*" are the filtered time evolution of evx (first) and evy (second)
+- "Scatter_all" are the scatter plots of filtered evx versus filtered evy. The slopes are from robust regressions.
+- "Bar_correlation" are correlation coefficients
+- "Bar_slope" are regression slopes for OLS and robust regressions
+
+### Two supplemnetary routines are necessary to run the model :
 - stationary_bootstrap.py : Matlab routine written by Kevin Sheppard, rewritten in Python. Provide mixed indexes following the stationary bootstrap procedure.
 - slopeinterval.py : Calculate confidence intervals of the slope for the figures
 
 #### Need to be done (07/12/16) :
-- A other filtering procedure
+- An other filtering procedure
 - Autocorrelation of the time series not ready yet
 - PDF of uncertainty not relevant for the figure
 

@@ -170,16 +170,15 @@ def bootstraprun(F0,F1):
 
 ##### User defined ######
 # Open timeseries evx and evy (identical time length)
+# See importfiles to modify your input
 typ     = 'observations'
+
 path0   = "../../data/"+typ+"/"
 pathfig = "../../figures/"+typ+"/"
-
 evx,evy = importfiles(typ,path0)
 
 # Data are monthly (routine not ready otherwise)
 samp = 'mth'
-##### User defined ######
-
 
 NB   = len(evx)
 data = np.zeros((2,NB))
@@ -207,15 +206,21 @@ for ij in np.arange(NB) :
 # Time already defined ('intra','season','inter')
 freqall = ['intra','season','inter']
 NF      = len(freqall)
-#tmp     = data
 tmp     = datanoseas
+evxfft  = np.zeros((NF+1,tmp.shape[-1]))
+evyfft  = np.zeros((NF+1,tmp.shape[-1]))
+evxfft[0,:]  = tmp[0,:]
+evyfft[0,:]  = tmp[1,:]
+
+
 name_serie = ['first','second']
 for ij in np.arange(len(name_serie)) :
   tmpFFT  = fft(tmp[ij,:],name_serie[ij],samp,freqall,pathfig)
   if ij == 0 :
-    evxfft = tmpFFT
+    evxfft[1:,:] = tmpFFT
   else :
-    evyfft = tmpFFT
+    evyfft[1:,:] = tmpFFT
+
     
 # Save slopes, correlation coefficient for the unfiltered data
 #slope0, int0, r0, slope_r0, int_r0 = slope_create(tmp[0,:],tmp[1,:])
@@ -228,7 +233,7 @@ r       = np.zeros((NF+1))
 slope_r = np.zeros((NF+1))
 int_r   = np.zeros((NF+1))
 # Bootstrap
-Nb = 200
+Nb       = 200
 slopeb   = np.zeros((NF+1,Nb))
 intb     = np.zeros((NF+1,Nb))
 rb       = np.zeros((NF+1,Nb))
@@ -236,10 +241,7 @@ slope_rb = np.zeros((NF+1,Nb))
 int_rb   = np.zeros((NF+1,Nb))
 
 for ij in np.arange(NF+1) :
-  if ij == 0 : #unfiltered
-    F0 = tmp[0,:]; F1 = tmp[1,:]
-  else : #filtered
-    F0 = evxfft[ij-1,:]; F1 = evyfft[ij-1,:]
+  F0 = evxfft[ij,:]; F1 = evyfft[ij,:]
   slope[ij], int[ij], r[ij], slope_r[ij], int_r[ij] = slope_create(F0,F1)
   # Bootstrapping (stationary)
   # Number of bootstrap Nb
@@ -282,11 +284,7 @@ fig = plt.figure('scatterplot')
 for ff in np.arange(NF+1) :
   plt.subplot(2,round(float(NF+1)/2),ff+1)
   title = freqall[ff]
-  if ff == 0 :
-    t0 = tmp[0,:];t1=tmp[1,:]
-  else :
-    f = ff-1
-    t0 = evxfft[f,:];t1=evyfft[f,:]
+  t0 = evxfft[ff,:];t1=evyfft[ff,:]
     
 
   a  = slope[ff]; ar  = slope_r[ff]
