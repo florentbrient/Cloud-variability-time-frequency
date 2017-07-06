@@ -1,0 +1,6 @@
+    Frequency     Corr coef   OLS regress  robust regress
+     deseason       -0.5147       -0.9981       -0.9547
+        intra       -0.5637       -1.2035       -1.1629
+       season       -0.9828       -1.3085       -1.2974
+        inter       -0.4090       -0.7148       -0.7357
+      decadal       -0.3142       -0.6296       -0.6256

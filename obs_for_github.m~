@@ -1,0 +1,24 @@
+fileobs = '/Users/florentbrient/Dropbox/CMIP5/CERES2/albcld/ERSST/albcld_ts_-30_30_0_360_ocean_slct_50000_ERSST_historical_step1_TEST.mat';
+ff      = open(fileobs);
+pathout = '/Users/florentbrient/Dropbox/GitHub/Cloud-variability-time-frequency/data/observations/';
+
+% Albedo evolution
+filein1 = [pathout,'albcld_ceres.txt'];
+albcld  = ff.ev_a'*100.0;
+dlmwrite(filein1,albcld)
+
+% SST evolution
+filein2 = [pathout,'sst_ersst.txt'];
+sst     = ff.ev_b';
+dlmwrite(filein2,sst)
+
+% Outputs
+filein2 = [pathout,'output_original.txt'];
+corr    = ff.corr_FFT';
+slope1  = ff.slope_FFT';
+slope2  = ff.b2_FFT';
+results = [corr,slope1,slope2];
+dlmwrite(filein2,sst)
+
+
+

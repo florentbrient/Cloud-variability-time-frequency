@@ -8,8 +8,49 @@ import statsmodels.api as sm
 import stationary_bootstrap as myboot
 import slopeinterval as myint
 
+# Import files
+def importfiles(typ,path0) :
+  if typ == 'random':
+    try :
+      # change it by your input path
+      print 'Read file.dat'
+      file0  = path0+'file.dat'
+      ev1,ev2 = np.loadtxt(file0, unpack=True)
+    except :
+      # Try random
+      t=np.arange(100)
+      # Three periods (4 months, 1 year, 3 years)
+      ev0=np.sin(2 * np.pi * t/4)/2 + np.sin(2 * np.pi * t/12) + np.sin(2 * np.pi * t/36)/2
+      # Add random noise
+      ev1=ev0 + np.random.random((len(t)))/2
+      ev2=ev1 + np.random.random((len(t)))/2
+      # Write in a file.dat
+      file0  = path0+'file.dat'
+      f = open(file0, 'wb')
+      for ij in np.arange(len(ev1)):
+        f.write("%.2f %.2f\n" % (ev1[ij], ev2[ij]))
+      f.close()
+  elif typ == 'observations':
+    # Observation data from Brient and Schneider 16 (Figure 2)
+    # Cloud albedo from CERES2
+    # SST from ERSST
+    # Averaged over 25% driest of the tropical area
+    ev1=[] ; ev2=[]
+    file1=open(path0+'sst_ersst.txt','r')
+    file1.readline()
+    for dd in file1.readlines():
+        data = float(dd.replace('\n',''))
+        ev1.append(data)
+    file2=open(path0+'albcld_ceres.txt','r')
+    file2.readline()
+    for dd in file2.readlines():
+        data = float(dd.replace('\n',''))
+        ev2.append(data)
+         
+  return ev1, ev2
+
 # Subroutine for the fft decomposition
-def fft(tmp,tmpch,samp,freqall) : 
+def fft(tmp,tmpch,samp,freqall,pathfig) : 
   # Calculate the Fourier transform for one time serie
   # Names allowed in freqall = intra,inter,decadal 
   y      = tmp
@@ -21,7 +62,7 @@ def fft(tmp,tmpch,samp,freqall) :
     Fs = 1/(30.*24.*3600.)       # Sampling frequency
       
   # Not sure about the real value to use
-  ripple = 0.01#.00001 #Fs#(Fs/np.power(10,8))*1000*1000*1000*1000
+  ripple = 0.01#.00001 #Fs#(Fs/np.power(10,8))*10^12
   
   fig = plt.figure('freq')
   #print freqall
@@ -55,8 +96,8 @@ def fft(tmp,tmpch,samp,freqall) :
     j += 1
 
   namefig = 'FFT_decomp_'+samp
-  fig.savefig('./'+namefig+'_'+tmpch+'.png')
-  fig.savefig('./'+namefig+'_'+tmpch+'.pdf')
+  fig.savefig(pathfig+namefig+'_'+tmpch+'.png')
+  fig.savefig(pathfig+namefig+'_'+tmpch+'.pdf')
   plt.close()
   
   del ripple, WP, band, deg, pmin, pmax
@@ -95,6 +136,7 @@ def define_fft(typ):
 def slope_create(F0,F1):
   # Calculate slopes (OLS)
   slope, intercept, r_value, p_value, std_err = stats.linregress(F0,F1)
+  
   # Slope with robust regression
   x = sm.add_constant(F0)
   y = F1
@@ -126,43 +168,27 @@ def bootstraprun(F0,F1):
 # The bootstrapping is based on index of one time series that allow keeping bootstrap homogeneity between the two time series
 # It provides also correlation coefficient, regression slopes (robust?) for the original temporal series and for the bootstrapped series
 
-
-
-
 ##### User defined ######
-# Open timeseries ev1 and ev2 (identical time length)
-try :
-  print 'Read file.dat'
-  ev1,ev2 = np.loadtxt('file.dat', unpack=True)
-except :
-  # Try random
-  t=np.arange(100)
-  # Three periods (4 months, 1 year, 3 years)
-  ev0=np.sin(2 * np.pi * t/4)/2 + np.sin(2 * np.pi * t/12) + np.sin(2 * np.pi * t/36)/2
-  # Add random noise
-  ev1=ev0 + np.random.random((len(t)))/2
-  ev2=ev1 + np.random.random((len(t)))/2
-  # Write in a file.dat
-  f = open('file.dat', 'wb')
-  for ij in np.arange(len(ev1)):
-    f.write("%.2f %.2f\n" % (ev1[ij], ev2[ij]))
-  f.close()
- 
-  
+# Open timeseries evx and evy (identical time length)
+typ     = 'observations'
+path0   = "../../data/"+typ+"/"
+pathfig = "../../figures/"+typ+"/"
+
+evx,evy = importfiles(typ,path0)
+
 # Data are monthly (routine not ready otherwise)
 samp = 'mth'
 ##### User defined ######
 
 
-NB   = len(ev1)
+NB   = len(evx)
 data = np.zeros((2,NB))
-data[0,:]=ev1 ; data[1,:]=ev2
+data[0,:]=evx ; data[1,:]=evy
 
 # Anomalies only
 datamean = np.mean(data,axis=1)
 for ij in np.arange(NB) :
   data[:,ij] =  data[:,ij] - datamean[:]
-  
   
 # Seasonal cycle
 dataseas = np.zeros((2,12))
@@ -185,11 +211,11 @@ NF      = len(freqall)
 tmp     = datanoseas
 name_serie = ['first','second']
 for ij in np.arange(len(name_serie)) :
-  tmpFFT  = fft(tmp[ij,:],name_serie[ij],samp,freqall)
+  tmpFFT  = fft(tmp[ij,:],name_serie[ij],samp,freqall,pathfig)
   if ij == 0 :
-    ev0fft = tmpFFT
+    evxfft = tmpFFT
   else :
-    ev1fft = tmpFFT
+    evyfft = tmpFFT
     
 # Save slopes, correlation coefficient for the unfiltered data
 #slope0, int0, r0, slope_r0, int_r0 = slope_create(tmp[0,:],tmp[1,:])
@@ -213,7 +239,7 @@ for ij in np.arange(NF+1) :
   if ij == 0 : #unfiltered
     F0 = tmp[0,:]; F1 = tmp[1,:]
   else : #filtered
-    F0 = ev0fft[ij-1,:]; F1 = ev1fft[ij-1,:]
+    F0 = evxfft[ij-1,:]; F1 = evyfft[ij-1,:]
   slope[ij], int[ij], r[ij], slope_r[ij], int_r[ij] = slope_create(F0,F1)
   # Bootstrapping (stationary)
   # Number of bootstrap Nb
@@ -228,20 +254,22 @@ for ij in np.arange(NF+1) :
 # Creating output files #
 #########################
 
-freqall = ['Full'] + freqall
+freqall = ['deseason'] + freqall
 
 # Original
-f = open('output_original.dat', 'wb')
+f = open(path0+'output_original.dat', 'wb')
+f.write('%13s %13s %13s %13s %13s %13s\n' % ('Frequency','Corr coef','OLS regress',' robust regress',' OLS intercept',' robust intercept'));
 for ij in np.arange(NF+1):
-  f.write("%7s %.5f %.5f %.3f %.5f %.5f\n" % (freqall[ij], slope[ij], int[ij], r[ij], slope_r[ij], int_r[ij]))
+  f.write("%13s %13.4f %13.4f %13.4f %13.4f %13.4f\n" % (freqall[ij], r[ij], slope[ij], slope_r[ij], int[ij], int_r[ij]))
 f.close()  
 
 # Bootstrapp
-fileout0='output_boot_xx.dat'
+fileout0=path0+'output_boot_xx.dat'
 for ij in np.arange(NF+1):
   f = open(fileout0.replace('xx',freqall[ij]), 'wb')
+  f.write('%13s %13s %13s %13s %13s %13s\n' % ('Frequency','Corr coef','OLS regress',' robust regress',' OLS intercept',' robust intercept'));
   for ib in np.arange(Nb):
-    f.write("%7s %.5f %.5f %.3f %.5f %.5f\n" % (freqall[ij], slopeb[ij,ib], intb[ij,ib], rb[ij,ib], slope_rb[ij,ib], int_rb[ij,ib]))
+    f.write("%13s %13.4f %13.4f %13.4f %13.4f %13.4f\n" % (freqall[ij], rb[ij,ib], slopeb[ij,ib], slope_rb[ij,ib], intb[ij,ib], int_rb[ij,ib]))
   f.close()
     
   
@@ -258,7 +286,7 @@ for ff in np.arange(NF+1) :
     t0 = tmp[0,:];t1=tmp[1,:]
   else :
     f = ff-1
-    t0 = ev0fft[f,:];t1=ev1fft[f,:]
+    t0 = evxfft[f,:];t1=evyfft[f,:]
     
 
   a  = slope[ff]; ar  = slope_r[ff]
@@ -284,8 +312,8 @@ for ff in np.arange(NF+1) :
   plt.title(title)
 
 namefig = 'Scatter_all'
-fig.savefig('./'+namefig+'.png')
-fig.savefig('./'+namefig+'.pdf')
+fig.savefig(pathfig+namefig+'.png')
+fig.savefig(pathfig+namefig+'.pdf')
 plt.close()
 
 
@@ -311,8 +339,8 @@ for ij in np.arange(len(nameall)):
   plt.xticks(np.arange(NF+1)+width/2,freqall)
   plt.title(nameall[ij])
   namefig = 'Bar_'+nameall[ij]
-  fig.savefig('./'+namefig+'.png')
-  fig.savefig('./'+namefig+'.pdf')
+  fig.savefig(pathfig+namefig+'.png')
+  fig.savefig(pathfig+namefig+'.pdf')
   plt.close()
   
 
