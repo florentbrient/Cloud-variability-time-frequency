@@ -3,8 +3,10 @@ Slopes and correlation coefficients between two time series (monthly data by def
 The two time series need to share the same temporal indexes. Written for monthly data, but should work for lower temporal variability.
 
 ## Preprocessing
-The code originated from Brient and Schneider (16). A preprocessing averaging has been made to identify monthly tropical low-cloud (TLC) regions. Both in observations and simulations, we averaged over the same equal-area grid with 240x121 cells globally and identified TLC regions as the 25% of the tropical ocean area
-(30°N–30°S) with the lowest midtropospheric (500 hPa) relative humidity (hur). Averages from observations are listed in  "sst_ersst.txt" and "albcld_ceres.txt" for SST and cloud albedo for the 183 months from March 2000 through May 2015.
+The code originated from Brient and Schneider (16). 
+A preprocessing averaging has been made to identify monthly tropical low-cloud (TLC) regions. 
+Both in observations and simulations, we averaged over the same equal-area grid with 240x121 cells globally and identified TLC regions as the 25% of the tropical ocean area (30°N–30°S) with the lowest midtropospheric (500 hPa) relative humidity (hur). 
+Averages from observations are listed in  "sst_ersst.txt" and "albcld_ceres.txt" for SST and cloud albedo for the 183 months from March 2000 through May 2015.
 
 ## Input
 The original code makes use of the following data, after some pre-processing. 
@@ -13,7 +15,7 @@ These data can come from CMIP models or observations (an example is available at
 | Frequency | Variable | CMOR labels | Unit | File Format |
 |:----------|:-----------------------------|:-------------|:------|:------------|
 | monthly mean | Sea surface temperature  | ts     |  K    | nc
-|  | TOA outgoing shortwave flux at the top-of-the-atmosphere  | rsut     |  Wm-2    | nc
+|  | TOA outgoing shortwave flux at the top-of-the-atmosphere  | rsut     |  W m^{-2}    | nc
 |  | Clear-sky outgoing shortwave flux at the top-of-the-atmosphere  | rsutcs     |  Wm-2    | nc
 |  | Solar insolation  at the top-of-the-atmosphere   | rsdt     |  Wm-2    | nc
 
