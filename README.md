@@ -2,11 +2,11 @@
 Slopes and correlation coefficients between two time series (monthly data by default).
 The two time series need to share the same temporal indexes. Written for monthly data, but should work for lower temporal variability.
 
-## Preprocessing :
+## Preprocessing
 The code originated from Brient and Schneider (16). A preprocessing averaging has been made to identify monthly tropical low-cloud (TLC) regions. Both in observations and simulations, we averaged over the same equal-area grid with 240x121 cells globally and identified TLC regions as the 25% of the tropical ocean area
 (30°N–30°S) with the lowest midtropospheric (500 hPa) relative humidity (hur). Averages from observations are listed in  "sst_ersst.txt" and "albcld_ceres.txt" for SST and cloud albedo for the 183 months from March 2000 through May 2015.
 
-## Input :
+## Input
 The original code makes use of the following data, after some pre-processing. 
 These data can come from CMIP models or observations (an example is available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/data)
 
@@ -29,7 +29,7 @@ These data can come from CMIP models or observations (an example is available at
 - If typ is set to "random" : 
   - evx and evy are randomly created
   
-## ‘Diagnostic calculation :
+## Diagnostic calculation
 - Separate the annual cycle and the deseasonalized variability.
 - Filter anomalies of the time series for different frequency bands. 
 These bands are defined as intra-annual (1-yr low-pass filter), inter-annual (1-yr high-pass filter) and decadal (10-yr low-pass filter). 
@@ -43,7 +43,7 @@ The resampled time series share the same total length L as the original time ser
 This PDF can be considered as confidence intervals of the original regression slope.
 
 
-## Outputs (written in output*.dat files) :
+## Outputs (written in output*.dat files)
 - For every frequency, the code writes in the files :
 	- 1. correlation coefficient
 	- 2. slope of the regression line (OLS) - %/K
@@ -60,7 +60,7 @@ The code create some figures, all of which are available at https://github.com/f
 - "Bar_correlation" are correlation coefficients
 - "Bar_slope" are regression slopes for OLS and robust regressions
 
-## Two supplementary routines are necessary to run the model :
+## Two supplementary routines are necessary to run the model
 - stationary_bootstrap.py : Matlab routine written by Kevin Sheppard, rewritten in Python. Provide mixed indexes following the stationary bootstrap procedure.
 - slopeinterval.py : Calculate confidence intervals of the slope for the figures
 
