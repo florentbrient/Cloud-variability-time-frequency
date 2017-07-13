@@ -15,7 +15,7 @@ These data can come from CMIP models or observations (an example is available at
 | Frequency | Variable | CMOR labels | Unit | File Format |
 |:----------|:-----------------------------|:-------------|:------|:------------|
 | monthly mean | Sea surface temperature  | ts     |  K    | nc
-|  | TOA outgoing shortwave flux at the top-of-the-atmosphere  | rsut     |  W m^{-2}    | nc
+|  | TOA outgoing shortwave flux at the top-of-the-atmosphere  | rsut     |  Wm-2    | nc
 |  | Clear-sky outgoing shortwave flux at the top-of-the-atmosphere  | rsutcs     |  Wm-2    | nc
 |  | Solar insolation  at the top-of-the-atmosphere   | rsdt     |  Wm-2    | nc
 
