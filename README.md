@@ -4,32 +4,32 @@ The two time series need to share the same temporal indexes. Written for monthly
 
 ## Preprocessing
 The code originated from Brient and Schneider (16). 
-A preprocessing averaging has been made to identify monthly tropical low-cloud (TLC) regions. 
-Both in observations and simulations, we averaged over the same equal-area grid with 240x121 cells globally and identified TLC regions as the 25% of the tropical ocean area (30°N–30°S) with the lowest midtropospheric (500 hPa) relative humidity (hur). 
-Averages from observations are listed in  "sst_ersst.txt" and "albcld_ceres.txt" for SST and cloud albedo for the 183 months from March 2000 through May 2015.
+A preprocessing averaging has been made to identify monthly-mean variations of tropical low-cloud (TLC) regions :
+
+Both for observations and simulations, we averaged over the same equal-area grid with 240x121 cells globally and identified TLC regions as the 25% of the tropical ocean area (30°N–30°S) with the lowest midtropospheric (500 hPa) relative humidity. 
+Outputs of this preprocessing from the observations are listed in  "sst_ersst.txt" and "albcld_ceres.txt" for SST and cloud albedo for the 183 months from March 2000 through May 2015.
 
 ## Input
-The original code makes use of the following data, after some pre-processing. 
+The original code makes use of the following data, after the preprocessing. 
 These data can come from CMIP models or observations (an example is available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/data)
 
 | Frequency | Variable | CMOR labels | Unit | File Format |
 |:----------|:-----------------------------|:-------------|:------|:------------|
+| monthly mean | Relative humidity profile  | hur     |  -    | nc
 | monthly mean | Sea surface temperature  | ts     |  K    | nc
 |  | TOA outgoing shortwave flux at the top-of-the-atmosphere  | rsut     |  Wm-2    | nc
 |  | Clear-sky outgoing shortwave flux at the top-of-the-atmosphere  | rsutcs     |  Wm-2    | nc
 |  | Solar insolation  at the top-of-the-atmosphere   | rsdt     |  Wm-2    | nc
 
-- If typ is set to "observations" :
-  - Two time series of values : SST (evx) and albcld (evy) listes in the files "sst_ersst.txt" and "albcld_ceres.txt" (See Preprocessing)
-  - Values are derived from the 25% driest monthly points of tropical oceans from ERSST and CERES2
+- By default, typ is "observations" :
+  - The "preprocessing output" files named "sst_ersst.txt" and "albcld_ceres.txt" are used as input in the diagnostic calculation.
+  - Two time series of values are listed : SST (evx) and albcld (evy) from ERSST and CERES2, from dries points obtained from ERA-Interim.
   - The variable "albcld" is the ratio between the SW CRE and the solar insolation (SWCRE/rsdt)
   - The results used in Brient and Schneider (16) are listed in "results_obs.txt"
   - The original data used to compute cloud albedo and SST are:
+    - Monthly ERA-Interim relative humidity : http://apps.ecmwf.int/datasets/data/interim-full-daily/levtype=sfc/
     - Monthly CERES-EBAF data set : https://ceres.larc.nasa.gov/products.php?product=EBAF-TOA
     - Monthly ERSST : https://www.ncdc.noaa.gov/data-access/marineocean-data/extended-reconstructed-sea-surface-temperature-ersst-v3b
-
-- If typ is set to "random" : 
-  - evx and evy are randomly created
   
 ## Diagnostic calculation
 - Separate the annual cycle and the deseasonalized variability.
@@ -38,7 +38,7 @@ These bands are defined as intra-annual (1-yr low-pass filter), inter-annual (1-
 A fourth band called "season" use a bandpass filter to extract the 12+/-0.2 months time period. A 12th-order Chebyshev filter is used by default.
 - Calculate ordinary linear regression, robust regression and correlation coefficient for the relationship between the two original time series.
 - Resample time series for each frequency bands through a non-parametric bootstrap procedure which takes the autocorrelations of the
-time series into account [Need to be done, work in Matlab]. 
+time series into account. 
 The original pairs of time series were resampled by drawing blocks of random length Li and assembling new pairs of bootstrap time series from them.
 The resampled time series share the same total length L as the original time series (the last block to be added is simply truncated to obtain the correct total length L).
 - Estimate Nb bootstrap samples of the original time series to permit estimating PDFs of uncertainty of original regression/correlation coefficients.
@@ -56,7 +56,7 @@ This PDF can be considered as confidence intervals of the original regression sl
 - The 'output_boot_*.dat' files lists the Nb boostrapped covariances of evx with evy for 4 different frequencies (deseason, intra, season, inter)
 
 ## Figures
-The code create some figures, all of which are available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/figures:
+The code creates some figures, all of which are available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/figures:
 - "FFT_decomp*" are the filtered time evolution of evx (first) and evy (second)
 - "Scatter_all" are the scatter plots of filtered evx versus filtered evy. The slopes are from robust regressions.
 - "Bar_correlation" are correlation coefficients
@@ -65,6 +65,7 @@ The code create some figures, all of which are available at https://github.com/f
 ## Two supplementary routines are necessary to run the model
 - stationary_bootstrap.py : Matlab routine written by Kevin Sheppard, rewritten in Python. Provide mixed indexes following the stationary bootstrap procedure.
 - slopeinterval.py : Calculate confidence intervals of the slope for the figures
+- opt_block_length_REV_dec07.m : A matlab code following Politis and White (2004). Not used in the current version, but used in results in the paper. Results are not strongly influenced by considering a fixed block length. For consistency with Brient and Schneider (16) results, this routine should be rewritten in Python.
 
 References
 ----------
