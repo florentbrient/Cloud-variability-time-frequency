@@ -6,13 +6,7 @@ The two time series need to share the same temporal indexes. Written for monthly
 The code originated from Brient and Schneider (16). 
 A preprocessing averaging has been made to identify monthly-mean variations of tropical low-cloud (TLC) regions :
 
-Both for observations and simulations, we averaged over the same equal-area grid with 240x121 cells globally and identified TLC regions as the 25% of the tropical ocean area (30°N–30°S) with the lowest midtropospheric (500 hPa) relative humidity. 
-Outputs of this preprocessing from the observations are listed in  "sst_ersst.txt" and "albcld_ceres.txt" for SST and cloud albedo for the 183 months from March 2000 through May 2015.
-
-## Input
-The original code makes use of the following data, after the preprocessing. 
-These data can come from CMIP models or observations (an example is available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/data)
-
+### Input
 | Frequency | Variable | CMOR labels | Unit | File Format |
 |:----------|:-----------------------------|:-------------|:------|:------------|
 | monthly mean | Relative humidity profile  | hur     |  -    | nc
@@ -21,15 +15,12 @@ These data can come from CMIP models or observations (an example is available at
 |  | Clear-sky outgoing shortwave flux at the top-of-the-atmosphere  | rsutcs     |  Wm-2    | nc
 |  | Solar insolation  at the top-of-the-atmosphere   | rsdt     |  Wm-2    | nc
 
-- By default, typ is "observations" :
-  - The "preprocessing output" files named "sst_ersst.txt" and "albcld_ceres.txt" are used as input in the diagnostic calculation.
-  - Two time series of values are listed : SST (evx) and albcld (evy) from ERSST and CERES2, from dries points obtained from ERA-Interim.
-  - The variable "albcld" is the ratio between the SW CRE and the solar insolation (SWCRE/rsdt)
-  - The results used in Brient and Schneider (16) are listed in "results_obs.txt"
-  - The original data used to compute cloud albedo and SST are:
-    - Monthly ERA-Interim relative humidity : http://apps.ecmwf.int/datasets/data/interim-full-daily/levtype=sfc/
-    - Monthly CERES-EBAF data set : https://ceres.larc.nasa.gov/products.php?product=EBAF-TOA
-    - Monthly ERSST : https://www.ncdc.noaa.gov/data-access/marineocean-data/extended-reconstructed-sea-surface-temperature-ersst-v3b
+Both for observations and simulations, we identified TLC regions as the 25% of the tropical ocean area (30°N–30°S) with the lowest midtropospheric (500 hPa) relative humidity. 
+We averaged over the same equal-area grid with 240x121 cells globally for relevant inter-model and model-to-observations comparisons.
+
+### Output
+Outputs of this preprocessing from the observations are listed in  "sst_ersst.txt" and "albcld_ceres.txt" for SST and cloud albedo for the 183 months from March 2000 through May 2015.
+
   
 ## Diagnostic calculation
 - Separate the annual cycle and the deseasonalized variability.
@@ -44,8 +35,23 @@ The resampled time series share the same total length L as the original time ser
 - Estimate Nb bootstrap samples of the original time series to permit estimating PDFs of uncertainty of original regression/correlation coefficients.
 This PDF can be considered as confidence intervals of the original regression slope.
 
+### Input
+The original code makes use the output data from the preprocessing analysis. 
+These data can come from CMIP models or observations (an example is available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/data)
 
-## Outputs (written in output*.dat files)
+- By default, typ is "observations" :
+  - The "preprocessing output" files named "sst_ersst.txt" and "albcld_ceres.txt" are used as input in the diagnostic calculation.
+  - Two time series of values are listed : SST (evx) and albcld (evy) from ERSST and CERES2, from dries points obtained from ERA-Interim.
+  - The variable "albcld" is the ratio between the SW CRE and the solar insolation (SWCRE/rsdt)
+  - The results used in Brient and Schneider (16) are listed in "results_obs.txt"
+  - The original data used to compute cloud albedo and SST are:
+    - Monthly ERA-Interim relative humidity : http://apps.ecmwf.int/datasets/data/interim-full-daily/levtype=sfc/
+    - Monthly CERES-EBAF data set : https://ceres.larc.nasa.gov/products.php?product=EBAF-TOA
+    - Monthly ERSST : https://www.ncdc.noaa.gov/data-access/marineocean-data/extended-reconstructed-sea-surface-temperature-ersst-v3b
+
+### Output (written in output*.dat files)
+
+#### Data
 - For every frequency, the code writes in the files :
 	- 1. correlation coefficient
 	- 2. slope of the regression line (OLS) - %/K
@@ -55,7 +61,7 @@ This PDF can be considered as confidence intervals of the original regression sl
 - The 'output_original.dat' file lists covariances of evx with evy
 - The 'output_boot_*.dat' files lists the Nb boostrapped covariances of evx with evy for 4 different frequencies (deseason, intra, season, inter)
 
-## Figures
+#### Figures
 The code creates some figures, all of which are available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/figures:
 - "FFT_decomp*" are the filtered time evolution of evx (first) and evy (second)
 - "Scatter_all" are the scatter plots of filtered evx versus filtered evy. The slopes are from robust regressions.
