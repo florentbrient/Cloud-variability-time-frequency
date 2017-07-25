@@ -50,7 +50,7 @@ These data can come from CMIP models or observations (an example is available at
     - Monthly CERES-EBAF data set : https://ceres.larc.nasa.gov/products.php?product=EBAF-TOA
     - Monthly ERSST : https://www.ncdc.noaa.gov/data-access/marineocean-data/extended-reconstructed-sea-surface-temperature-ersst-v3b
 
-### Output (written in output*.dat files)
+### Output
   - Data
     - For every frequency, the code writes in the files :
   	  - 1. correlation coefficient
@@ -68,7 +68,7 @@ These data can come from CMIP models or observations (an example is available at
       - "Bar_correlation" are correlation coefficients
       - "Bar_slope" are regression slopes for OLS and robust regressions
 
-## Two supplementary routines are necessary to run the model
+## Two supplementary routines needed to run the model
 - stationary_bootstrap.py : Matlab routine written by Kevin Sheppard, rewritten in Python. Provide mixed indexes following the stationary bootstrap procedure.
 - slopeinterval.py : Calculate confidence intervals of the slope for the figures
 - opt_block_length_REV_dec07.m : A matlab code following Politis and White (2004). Not used in the current version, but used in results in the paper. Results are not strongly influenced by considering a fixed block length. For consistency with Brient and Schneider (16) results, this routine should be rewritten in Python.
