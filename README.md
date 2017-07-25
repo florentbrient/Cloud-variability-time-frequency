@@ -52,23 +52,22 @@ These data can come from CMIP models or observations (an example is available at
     - Monthly ERSST : https://www.ncdc.noaa.gov/data-access/marineocean-data/extended-reconstructed-sea-surface-temperature-ersst-v3b
 
 ### Output (written in output*.dat files)
-
-  #### Data
-  - For every frequency, the code writes in the files :
-  	- 1. correlation coefficient
-	- 2. slope of the regression line (OLS) - %/K
-	- 3. slope of the robust regression line - %/K
-	- 4. intercept of the regression line (OLS)
-	- 5. intercept of the robust regression line
-  - The 'output_original.dat' file lists covariances of evx with evy
-  - The 'output_boot_*.dat' files lists the Nb boostrapped covariances of evx with evy for 4 different frequencies (deseason, intra, season, inter)
-
-  #### Figures
-  The code creates some figures, all of which are available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/figures:
-  - "FFT_decomp*" are the filtered time evolution of evx (first) and evy (second)
-  - "Scatter_all" are the scatter plots of filtered evx versus filtered evy. The slopes are from robust regressions.
-  - "Bar_correlation" are correlation coefficients
-  - "Bar_slope" are regression slopes for OLS and robust regressions
+	#### Data
+  	- For every frequency, the code writes in the files :
+  		- 1. correlation coefficient
+		- 2. slope of the regression line (OLS) - %/K
+		- 3. slope of the robust regression line - %/K
+		- 4. intercept of the regression line (OLS)
+		- 5. intercept of the robust regression line
+  	- The 'output_original.dat' file lists covariances of evx with evy
+  	- The 'output_boot_*.dat' files lists the Nb boostrapped covariances of evx with evy for 4 different frequencies (deseason, intra, season, inter)
+  	
+	#### Figures
+  	The code creates some figures, all of which are available at https://github.com/florentbrient/Cloud-variability-time-frequency/tree/master/figures:
+ 	- "FFT_decomp*" are the filtered time evolution of evx (first) and evy (second)
+  	- "Scatter_all" are the scatter plots of filtered evx versus filtered evy. The slopes are from robust regressions.
+  	- "Bar_correlation" are correlation coefficients
+  	- "Bar_slope" are regression slopes for OLS and robust regressions
 
 ## Two supplementary routines are necessary to run the model
 - stationary_bootstrap.py : Matlab routine written by Kevin Sheppard, rewritten in Python. Provide mixed indexes following the stationary bootstrap procedure.
