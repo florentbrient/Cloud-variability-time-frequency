@@ -8,7 +8,7 @@ A preprocessing averaging has been made to identify monthly-mean variations of t
 ## Preprocessing
 ### Input
 | Frequency | Variable | CMOR labels | Unit | File Format |
-|:----------|:-----------------------------|:-------------|:------|:------------|
+|:----------|:-----------------------------|:-------------|:--------|:------------|
 | monthly mean | Relative humidity profile  | hur     |  -    | nc
 | monthly mean | Sea surface temperature  | ts     |  K    | nc
 |  | TOA outgoing shortwave flux at the top-of-the-atmosphere  | rsut     |  Wm-2    | nc
